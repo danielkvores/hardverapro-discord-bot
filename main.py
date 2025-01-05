@@ -1,50 +1,68 @@
 import requests
-from bs4 import BeautifulSoup
 import time
+from bs4 import BeautifulSoup
+import lxml
 
-try:
-    import lxml
-except ImportError:
-    print("`lxml` is not available, defaulting to `html.parser`")
 
-url = "https://hardverapro.hu/aprok/notebook/apple/index.html"
+def fetch_html(url):
+    """Fetches the HTML content from a URL, handles request errors."""
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        return response.text
+    except requests.exceptions.RequestException as e:
+        print(f"Request failed: {e}")
+        return None
 
-try:
-    response = requests.get(url)
-    response.raise_for_status()
 
-    html_content = response.text
+def parse_html(html_content):
+    """Parses the HTML content with lxml if available, falls back to html.parser."""
+    if not html_content:
+        return None
     try:
         soup = BeautifulSoup(html_content, "lxml")
-        print("Used `lxml` as a parser")
+        print("Used 'lxml' as parser")
+        return soup
     except NameError:
         soup = BeautifulSoup(html_content, "html.parser")
-        print("Used `html.parser` as a parser")
+        print("Used 'html.parser' as parser")
+        return soup
 
-    prices = []
-    price_elements = soup.find_all("div", class_="uad-price")
-    names = []
-    name_elements = soup.find_all("div", class_="uad-title")
 
-    if price_elements:
-        for price_element in price_elements:
-            price = price_element.text.strip()
-            prices.append(price)
+def extract_data(soup, element_type, class_name):
+    """Extract data using specified type and class"""
+    data = []
+    elements = soup.find_all(element_type, class_=class_name)
+    if elements:
+        for element in elements:
+            data.append(element.text.strip())
 
+        return data
+    else:
+        print(f"{element_type} elements with class name {class_name} not found")
+        return None
+
+
+def process_url(url):
+    """Fetches, parses, and extract data from given URL."""
+    html_content = fetch_html(url)
+    if not html_content:
+        return
+
+    soup = parse_html(html_content)
+    if not soup:
+        return
+    prices = extract_data(soup, "div", "uad-price")
+    if prices:
         print(f"Found prices: {prices}")
-    else:
-        print("Price element not found on the page.")
 
-    if name_elements:
-        for name_element in name_elements:
-            name = name_element.text.strip()
-            names.append(name)
-
+    names = extract_data(soup, "div", "uad-title")
+    if names:
         print(f"Found names: {names}")
-    else:
-        print("Price element not found on the page.")
-
     time.sleep(1)
 
-except requests.exceptions.RequestException as e:
-    print(f"Request failed: {e}")
+
+if __name__ == "__main__":
+    urls = ["https://hardverapro.hu/aprok/notebook/apple/index.html"]
+    for url in urls:
+        process_url(url)
