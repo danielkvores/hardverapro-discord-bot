@@ -1,0 +1,100 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.whl
+pip-log.txt
+pip-delete-this.txt
+*.egg
+
+# Installer logs
+pip-log.txt
+pip-delete-this.txt
+
+# Virtual environment
+.venv/
+venv/
+*/venv
+*/.venv
+
+# Environments specific files
+.env
+*.env
+.envrc
+
+# MyPy cache
+.mypy_cache/
+
+# Django-specific
+*.sqlite3
+*.sqlite
+local_settings.py
+local_settings.json
+
+
+# Log files
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# JetBrains IDEs
+*.iws
+*.iml
+*.ipr
+.idea/
+
+
+# VS Code
+.vscode
+
+# PyCharm specific files
+.idea/
+
+# C files
+*.o
+*.exe
+*.dll
+
+# Documentation Artifacts
+*.html
+*.pdf
+*.epub
+
+# Test results
+*.xml
+*.json
+*.coverage
+coverage
+
+#Temporary files
+tmp
+
+# Windows
+Thumbs.db
+ehthumbs.db
+*.lnk
