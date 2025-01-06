@@ -52,7 +52,7 @@ data = {
 df = pd.DataFrame(data)
 df.to_excel("output.xlsx", index=False)
 
-Webhook_URL = "WEBHOOK_URL"
+Webhook_URL = "https://discord.com/api/webhooks/1325802725811814481/dSr9ZWTiABYgYO9eeP_pxM1c2AkDa_UgPtFbG3XUGfJdbKwZBTD3HUO2lSRKjsCzkptY"
 
 
 for index, row in df.iterrows():
@@ -61,6 +61,7 @@ for index, row in df.iterrows():
             "embeds": [
                 {
                     "title": row["Listing name"],
+                    "url": row["Link"],
                     "color": 16750848,
                     "fields": [
                         {
@@ -94,6 +95,7 @@ for index, row in df.iterrows():
                     ],
                     "author": {
                         "name": "Új listing jelent meg az oldon!",
+                        "url": row["Link"],
                     },
                     "footer": {
                         "text": "@KvoDani, @DinnyOS"
