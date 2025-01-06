@@ -52,7 +52,7 @@ data = {
 df = pd.DataFrame(data)
 df.to_excel("output.xlsx", index=False)
 
-Webhook_URL = "https://discord.com/api/webhooks/1325802725811814481/dSr9ZWTiABYgYO9eeP_pxM1c2AkDa_UgPtFbG3XUGfJdbKwZBTD3HUO2lSRKjsCzkptY"
+Webhook_URL = "DISCORD_WEBHOOK_URL"
 
 
 for index, row in df.iterrows():
