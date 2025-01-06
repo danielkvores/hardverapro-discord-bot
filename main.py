@@ -38,23 +38,19 @@ listing_elements = soup.find_all("div", class_="uad-title")
 review_elements = soup.find_all("span", class_="uad-rating")
 other_elements = soup.find_all("div", class_="uad-light")
 location_and_username = [other_element.text.strip() for other_element in other_elements]
+link_elements = [listing_element.find('a')['href'] for listing_element in listing_elements]
 
 data = {
-    "Listing name": [
-        listing_element.text.strip() for listing_element in listing_elements
-    ],
+    "Listing name": [listing_element.text.strip() for listing_element in listing_elements],
     "Price": [price_element.text.strip() for price_element in price_elements],
     "Reviews": [review_element.text.strip() for review_element in review_elements],
-    "Username": [
-        location_and_username[i] for i in range(1, len(location_and_username), 3)
-    ],
-    "Location": [
-        location_and_username[i] for i in range(0, len(location_and_username), 3)
-    ],
+    "Username": [location_and_username[i] for i in range(1, len(location_and_username), 3)],
+    "Location": [location_and_username[i] for i in range(0, len(location_and_username), 3)],
+    "Link": [link_element for link_element in link_elements]
 }
 
 df = pd.DataFrame(data)
-rich_display_dataframe(df, title="Hardverapro")
+df.to_excel("output.xlsx", index=False)
 
 Webhook_URL = "WEBHOOK_URL"
 
@@ -109,5 +105,5 @@ for index, row in df.iterrows():
     
         response = requests.post(Webhook_URL, json=embed_data)
         response.raise_for_status()
-        time.sleep(3)  # To avoid hitting rate limits
+        time.sleep(0.6)  # To avoid hitting rate limits
         #  Pictures, description, status, condition, links coming soon to the webhook.
