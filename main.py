@@ -4,6 +4,7 @@ import time
 import pandas as pd
 import json
 import os
+import threading
 
 def rich_display_dataframe(df, title):
     """Function do display the data nicely for CLI. Not needed for excel, etc."""
@@ -57,7 +58,7 @@ def get_listing_data(soup):
             else:
                 rating_elements.append(rating_text)
     else:
-        rating_elements.append("!Rendelkezik negatív értékeléssel!")
+        rating_elements.append("!RENDELKEZIK NEGATÍV ÉRTÉKELÉSSEL!")
 
     username_elements = [element.find("a").text.strip() for element in soup.find_all("div", class_="uad-misc") if element.find("a")]
     link_elements = [listing_element.find('a')['href'] for listing_element in listing_elements]
@@ -181,7 +182,7 @@ def send_webhook(data, listings, webhook_url):
         "attachments": []
     }
 
-    for i in range(1, min(4, len(data["Images"]))):  # Maximum 4 pictures
+    for i in range(1, min(4, len(data["Images"]))):  # Maximum 4 pictures is enabled
         embed_data["embeds"].append({
             "color": 16750848,
             "title": f"__{i+1}. kép:__",
@@ -197,22 +198,28 @@ def send_webhook(data, listings, webhook_url):
     response = requests.post(webhook_url, json=embed_data)
     response.raise_for_status()
 
-def main():
-    URL = "https://hardverapro.hu/aprok/mobil/mobil/iphone/iphone_14_2/iphone_14_pro/index.html"
-    Webhook_URL = "YOUR DISCORD WEBHOOK URL" # Replace with your Discord webhook URL
-    filename = "listings.xlsx"
+# Global variable to track the last request time
+time_of_last_request = 0
+request_lock = threading.Lock()
 
+def monitor_url(url, webhook_url, filename):
+    global time_of_last_request
     existing_listings = load_from_excel(filename)
     if not existing_listings:
-        for listing in get_listing_data(BeautifulSoup(requests.get(URL).text, "lxml")):
-            detailed_data = get_detailed_data(listing["Link"])
-            listing.update(detailed_data)
+        for listing in get_listing_data(BeautifulSoup(requests.get(url).text, "lxml")):
             existing_listings.append(listing)
     save_to_excel(existing_listings, filename)
 
-
     while True:
-        response = requests.get(URL)
+        # Enforce a minimum delay between requests to avoid rate limits
+        with request_lock:
+            current_time = time.time()
+            time_since_last_request = current_time - time_of_last_request
+            if time_since_last_request < 1.5:
+                time.sleep(1.5 - time_since_last_request)
+            time_of_last_request = time.time()
+
+        response = requests.get(url)
         response.raise_for_status()
         html_content = response.text
         soup = BeautifulSoup(html_content, "lxml")
@@ -224,10 +231,31 @@ def main():
                 detailed_data = get_detailed_data(listing["Link"])
                 listing.update(detailed_data)
                 existing_listings.append(listing)
-                send_webhook(detailed_data, listing, Webhook_URL)
+                send_webhook(detailed_data, listing, webhook_url)
 
         save_to_excel(existing_listings, filename)
-        time.sleep(15)
+        time.sleep(5)  # Per-thread delay for next check
+
+def main():
+    num_urls = int(input("Hány darab Hardverapró linket szeretnél megfigyelni? (1 vagy több): "))
+    if num_urls < 1:
+        print("Kérlek egy érvényes számot adj meg (1 vagy több.).")
+        return
+
+    threads = []
+
+    for i in range(num_urls):
+        url = input(f"{i + 1} Írd be a megfigyelni kivánt Hardverapró oldal URL-jét: ")
+        webhook_url = input(f"{i + 1} Írd be a Discord Webhook URL-jét: ")
+        filename = input(f"{i + 1} Írd be a kivánt fájlnevet a listák mentéséhez: ") + ".xlsx"
+
+        thread = threading.Thread(target=monitor_url, args=(url, webhook_url, filename))
+        threads.append(thread)
+        thread.start()
+        time.sleep(1.25 * (i + 1))  # Adjust delay dynamically based on thread index
+
+    for thread in threads:
+        thread.join()
 
 if __name__ == "__main__":
     main()
