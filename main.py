@@ -167,7 +167,7 @@ def send_webhook(data, listings, webhook_url):
                     }                    
                 ],
                 "author": {
-                    "name": "Új listing jelent meg az oldalon!",
+                    "name": "Új hirdetés jelent meg az oldalon!",
                     "url": listings["Link"],
                     "icon_url": listings["Main picture"]
                 },
@@ -237,7 +237,7 @@ def monitor_url(url, webhook_url, filename):
         time.sleep(5)  # Per-thread delay for next check
 
 def main():
-    num_urls = int(input("Hány darab Hardverapró linket szeretnél megfigyelni? (1 vagy több): "))
+    num_urls = int(input("Hány darab Hardverapró oldalt szeretnél megfigyelni? (1 vagy több): "))
     if num_urls < 1:
         print("Kérlek egy érvényes számot adj meg (1 vagy több.).")
         return
@@ -245,9 +245,9 @@ def main():
     threads = []
 
     for i in range(num_urls):
-        url = input(f"{i + 1} Írd be a megfigyelni kivánt Hardverapró oldal URL-jét: ")
-        webhook_url = input(f"{i + 1} Írd be a Discord Webhook URL-jét: ")
-        filename = input(f"{i + 1} Írd be a kivánt fájlnevet a listák mentéséhez: ") + ".xlsx"
+        url = input(f"{i + 1}. Írd be a megfigyelni kivánt Hardverapró oldal URL-jét: ")
+        webhook_url = input(f"{i + 1}. Írd be a Discord Webhook URL-jét: ")
+        filename = input(f"{i + 1}. Írd be a kivánt fájlnevet a listák mentéséhez: ") + ".xlsx"
 
         thread = threading.Thread(target=monitor_url, args=(url, webhook_url, filename))
         threads.append(thread)
