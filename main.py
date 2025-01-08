@@ -247,7 +247,7 @@ def main():
     for i in range(num_urls):
         url = input(f"{i + 1}. Írd be a megfigyelni kivánt Hardverapró oldal URL-jét: ")
         webhook_url = input(f"{i + 1}. Írd be a Discord Webhook URL-jét: ")
-        filename = input(f"{i + 1}. Írd be a kivánt fájlnevet a listák mentéséhez: ") + ".xlsx"
+        filename = input(f"{i + 1}. Írd be a kivánt fájlnevet az aktív hirdetések mentéséhez: ") + ".xlsx"
 
         thread = threading.Thread(target=monitor_url, args=(url, webhook_url, filename))
         threads.append(thread)
