@@ -254,8 +254,21 @@ def main():
         thread.start()
         time.sleep(1.25 * (i + 1))  # Adjust delay dynamically based on thread index
 
-    for thread in threads:
-        thread.join()
+    print("A program fut, és figyeli a Hardverapró oldalakat... \nHa új hirdetés jelenik meg, értesítést kapsz a Discord szervereden!")
+ 
+    while True:
+        user_input = input("Ha új oldalt szeretnél figyelni, akkor írd be az 'u' betűt: ").strip().upper()
+        if user_input == 'U':
+            url = input(f"{len(threads) + 1}. Írd be a megfigyelni kivánt Hardverapró oldal URL-jét: ")
+            webhook_url = input(f"{len(threads) + 1}. Írd be a Discord Webhook URL-jét: ")
+            filename = input(f"{len(threads) + 1}. Írd be a kivánt fájlnevet az aktív hirdetések mentéséhez: ") + ".xlsx"
 
+            thread = threading.Thread(target=monitor_url, args=(url, webhook_url, filename))
+            threads.append(thread)
+            thread.start()
+            time.sleep(1.25 * (len(threads)))  # Adjust delay dynamically based on thread index
+        else:
+            input("Ha új oldalt szeretnél figyelni, akkor írd be az 'u' betűt: ")
+        
 if __name__ == "__main__":
     main()
