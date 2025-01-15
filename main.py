@@ -32,45 +32,42 @@ def load_from_excel(filename="listings.xlsx"):
     return []
 
 def get_listing_data(soup):
-    price_elements = soup.find_all("div", class_="uad-price")
-    listing_elements = soup.find_all("div", class_="uad-title")
-    
-    location_elements = []
-    for element in soup.find_all("div", class_="uad-info"):
-        span_element = element.find("span")
-        if span_element and "data-original-title" in span_element.attrs:
-            location_elements.append(span_element["data-original-title"])
-        else:
-            location_elements.append(element.find("div", class_="uad-light").text.strip())
+    price_elements = [element.find("span", class_="text-nowrap").text.strip() for element in soup.find_all("div", class_="uad-price")]
+
+    listing_elements = [element.find("a").text.strip() for element in soup.find_all("div", class_="uad-col uad-col-title")]
+
+    location_elements = [element.find("div", class_="uad-cities").text.strip() for element in soup.find_all("div", class_="uad-col uad-col-info")]
 
     rating_elements = []
-    for element in soup.find_all("div", class_="uad-misc"):
-        rating_span = element.find("span", class_="uad-rating")
-        if rating_span and "data-original-title" in rating_span.attrs:
-            #  If "data-original-title" is present, we use that as the rating
-            rating_text = rating_span["data-original-title"].strip()
-            rating_elements.append(rating_text)
-        elif rating_span:
-            # If  "data-original-title" is not present, we use the text of the span element
-            rating_text = rating_span.text.strip()
-            if rating_text == "n.a.":
-                rating_elements.append("nincs értékelése")
+    for element in soup.find_all("div", class_="uad-col uad-col-info"):
+        rating_span = element.find("span", class_="uad-user-rating")
+        if rating_span:
+            positive_rating = rating_span.find("span", class_="uad-rating-positive")
+            negative_rating = rating_span.find("span", class_="uad-rating-negative")
+            if positive_rating and negative_rating:
+                rating_text = f"{positive_rating.text.strip()} | {negative_rating.text.strip()}"
+            elif positive_rating:
+                rating_text = positive_rating.text.strip()
             else:
-                rating_elements.append(rating_text)
-    else:
-        rating_elements.append("!RENDELKEZIK NEGATÍV ÉRTÉKELÉSSEL!")
+                rating_text = "Nincsen értékelése"
+            rating_elements.append(rating_text)
+        else:
+            rating_elements.append("Csak negatív értékeléssel rendelkezik")
 
-    username_elements = [element.find("a").text.strip() for element in soup.find_all("div", class_="uad-misc") if element.find("a")]
-    link_elements = [listing_element.find('a')['href'] for listing_element in listing_elements]
-    main_picture_elements = soup.find_all("a", class_="uad-image align-self-center")
-    main_picture_elements = ["https:" + element.find("img")["src"] for element in main_picture_elements]
+    username_elements = [element.find("a").text.strip() for element in soup.find_all("div", class_="uad-user") if element.find("a")]
+    link_elements = [h1.find('a')['href'] for h1 in soup.find_all("div", class_="uad-col uad-col-title") if h1.find('a')]
+    main_picture_elements = []
+    for element in soup.find_all("a", class_="uad-image"):
+        img_element = element.find("img")
+        if img_element and "src" in img_element.attrs:
+            main_picture_elements.append("https:" + img_element["src"])
 
     listings = []
     for i in range(len(listing_elements)):
         listings.append({
-            "Listing": listing_elements[i].text.strip(),
+            "Listing": listing_elements[i],
             "Link": link_elements[i],
-            "Price": price_elements[i].text.strip(),
+            "Price": price_elements[i],
             "Username": username_elements[i],
             "Location": location_elements[i],
             "Seller Ratings": rating_elements[i],
@@ -259,3 +256,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
