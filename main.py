@@ -56,11 +56,14 @@ def get_listing_data(soup):
 
     username_elements = [element.find("a").text.strip() for element in soup.find_all("div", class_="uad-user") if element.find("a")]
     link_elements = [h1.find('a')['href'] for h1 in soup.find_all("div", class_="uad-col uad-col-title") if h1.find('a')]
+
     main_picture_elements = []
     for element in soup.find_all("a", class_="uad-image"):
         img_element = element.find("img")
         if img_element and "src" in img_element.attrs:
             main_picture_elements.append("https:" + img_element["src"])
+
+    time_elements = [element.find("time").text.strip() for element in soup.find_all("div", class_="uad-col uad-col-info")]
 
     listings = []
     for i in range(len(listing_elements)):
@@ -71,7 +74,8 @@ def get_listing_data(soup):
             "Username": username_elements[i],
             "Location": location_elements[i],
             "Seller Ratings": rating_elements[i],
-            "Main picture": main_picture_elements[i]
+            "Main picture": main_picture_elements[i],
+            "Time": time_elements[i]
         })
     return listings
 
@@ -137,6 +141,10 @@ def send_webhook(data, listings, webhook_url):
                     {
                         "name": "> __Ár: __",
                         "value": f"`{listings['Price']}`"
+                    },
+                    {
+                        "name": "> __Közzététel:__",
+                        "value": f"`{listings['Time']}`"
                     },
                     {
                         "name": "> __Lokáció:__",
