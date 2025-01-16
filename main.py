@@ -32,11 +32,12 @@ def load_from_excel(filename="listings.xlsx"):
     return []
 
 def get_listing_data(soup):
-    price_elements = [element.find("span", class_="text-nowrap").text.strip() for element in soup.find_all("div", class_="uad-price")]
-
     listing_elements = [element.find("a").text.strip() for element in soup.find_all("div", class_="uad-col uad-col-title")]
-
+    price_elements = [element.find("span", class_="text-nowrap").text.strip() for element in soup.find_all("div", class_="uad-col uad-col-title")]
     location_elements = [element.find("div", class_="uad-cities").text.strip() for element in soup.find_all("div", class_="uad-col uad-col-info")]
+    username_elements = [element.find("a").text.strip() for element in soup.find_all("div", class_="uad-user") if element.find("a")]
+    link_elements = [h1.find('a')['href'] for h1 in soup.find_all("div", class_="uad-col uad-col-title") if h1.find('a')]
+    time_elements = [element.find("time").text.strip() for element in soup.find_all("div", class_="uad-col uad-col-info")]
 
     rating_elements = []
     for element in soup.find_all("div", class_="uad-col uad-col-info"):
@@ -49,13 +50,10 @@ def get_listing_data(soup):
             elif positive_rating:
                 rating_text = positive_rating.text.strip()
             else:
-                rating_text = "Nincsen értékelése"
+                rating_text = "0"
             rating_elements.append(rating_text)
         else:
             rating_elements.append("Csak negatív értékeléssel rendelkezik")
-
-    username_elements = [element.find("a").text.strip() for element in soup.find_all("div", class_="uad-user") if element.find("a")]
-    link_elements = [h1.find('a')['href'] for h1 in soup.find_all("div", class_="uad-col uad-col-title") if h1.find('a')]
 
     main_picture_elements = []
     for element in soup.find_all("a", class_="uad-image"):
@@ -63,9 +61,8 @@ def get_listing_data(soup):
         if img_element and "src" in img_element.attrs:
             main_picture_elements.append("https:" + img_element["src"])
 
-    time_elements = [element.find("time").text.strip() for element in soup.find_all("div", class_="uad-col uad-col-info")]
-
     listings = []
+    
     for i in range(len(listing_elements)):
         listings.append({
             "Listing": listing_elements[i],
